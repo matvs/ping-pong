@@ -1,71 +1,8 @@
-let playerA;
-let playerB;
-let ball;
-const AI = false;
-const margin = 10;
-function setup() {
-  createCanvas(750, 400);
-  //  createCanvas(1800, 1800, WEBGL);
-  playerA = new Paddle(margin)
-  playerB = new Paddle(width - margin*2)
-
-  ball = new Ball(playerA.x + playerA.width + 10, playerA.y + playerA.height / 2)
 
 
-}
-let isRunning = false;
-const KEY_W = 87;
-const KEY_S = 83;
-const SPACEBAR = 32;
-function draw() {
-  background(51, 51, 51);
+window.addEventListener('load', function(event) {
 
-  if (isRunning && AI) {
-    playerA.follow(ball);
-  } 
-
-  if (keyIsDown(UP_ARROW)) {
-    playerB.goUp();
-  }
-
-  if (keyIsDown(DOWN_ARROW)) {
-    playerB.goDown();
-  }
-
-  if (keyIsDown(KEY_W)) {
-    playerA.goUp();
-  }
-
-  if (keyIsDown(KEY_S)) {
-    playerA.goDown();
-  }
-
-  if (keyIsDown(SPACEBAR)) {
-    isRunning = !isRunning;
-  }
-
-  playerA.draw();
-  playerB.draw();
-
-  ball.draw();
-
-  if(isRunning) {
-    ball.update();
-  }
-  stroke('#ffffff');
-  line(width / 2, 0, width / 2, height)
-}
-
-
-// const SPACEBAR = 32;
-// function keyPressed() {
-//   if(keyCode === UP_ARROW) {
-//     playerB.goUp();
-//   } else if(keyCode === DOWN_ARROW) {
-//     playerB.goDown();
-//   }
-
-// }
+  const PingPongGame = (function() {
 
 class Paddle {
   width = 10;
@@ -79,12 +16,12 @@ class Paddle {
 
   draw() {
     // noStroke();
-    fill('#ffffff');
-    textSize(38)
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '38px sans-serif';
     // text(this.points, this.x < width/2 ? width/2 - this.width*3 : width/2 + this.width, 30)
-    text(this.points, this.x < width/2 ? width/2 - this.width*6 : width/2 + this.width*4, 30)
-    stroke('#ffffff');
-    rect(this.x, this.y, this.width, this.height);
+    ctx.fillText(this.points, this.x < width/2 ? width/2 - this.width*6 : width/2 + this.width*4, 30)
+    ctx.strokeStyle = '#ffffff';
+    ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 
   goUp() {
@@ -116,71 +53,165 @@ class Paddle {
 
 
 class Ball {
-  r = 14;
+  r = 7;
   angle = Math.PI/4;
   v = 7;
   constructor(x, y) {
     this.x = x + this.r/2;
     this.y = y;
 
-    
+
   }
 
   draw() {
-    stroke('#ffffff');
-    fill('#ffffff');
-    circle(this.x, this.y, this.r);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+    ctx.fill();
   }
 
   update() {
       this.y += this.v * Math.sin(this.angle);
       this.x += this.v * Math.cos(this.angle);
-      
-      if (this.collision(playerA) || this.collision(playerB, false) || this.didHitTheWall()) {
+
+      if (this.collision(leftPlayer) || this.collision(rightPlayer, false) || this.didHitTheWall()) {
         if (this.x <= 0) {
-          playerB.points ++;
+          rightPlayer.points ++;
           isRunning = false;
-          this.x = playerA.x + playerA.width + this.r/2 + 10;
+          this.x = leftPlayer.x + leftPlayer.width + this.r/2 + 10;
           // this.x = width/2;
-          this.y = playerA.y + playerA.height / 2;
+          this.y = leftPlayer.y + leftPlayer.height / 2;
         } else if(this.x >= width) {
-          playerA.points ++;
+          leftPlayer.points ++;
           isRunning = false;
-          this.x = playerB.x - this.r/2 - 10;
+          this.x = rightPlayer.x - this.r/2 - 10;
           // this.x = width/2;
-          this.y = playerB.y + playerB.height / 2;
+          this.y = rightPlayer.y + rightPlayer.height / 2;
         }
-        if(this.collision(playerA)) {
-          const ratio = ((playerA.y + playerA.height/2) - this.y) / (playerA.height/2)
+        if(this.collision(leftPlayer)) {
+          const ratio = ((leftPlayer.y + leftPlayer.height/2) - this.y) / (leftPlayer.height/2)
           console.log(ratio)
           this.angle = -ratio*(Math.PI/4) ;
 
-        } else if ( this.collision(playerB, false) ) {
-          const ratio = ((playerB.y + playerB.height/2) - this.y) / (playerB.height/2)
+        } else if ( this.collision(rightPlayer, false) ) {
+          const ratio = ((rightPlayer.y + rightPlayer.height/2) - this.y) / (rightPlayer.height/2)
           console.log(ratio)
           this.angle = ratio*(Math.PI/4) + Math.PI;
         } else {
           // this.angle += Math.PI/2;
           this.angle = 2*Math.PI - this.angle;
         }
-       
-        
-   
+
+
+
         this.angle = this.angle >= 2*Math.PI ? this.angle -  2*Math.PI  : this.angle;
       }
   }
 
   didHitTheWall() {
-    return this.x <= 0 || this.x >= width || this.y <= 0 || this.y >= height; 
+    return this.x <= 0 || this.x >= width || this.y <= 0 || this.y >= height;
   }
 
 
-  collision(player, isPlayerA = true) {
+  collision(player, isleftPlayer = true) {
     // return (x - this.x)*(x - this.x) + (y - this.y)*(y - this.y) <= this.r*this.r;
-    if(isPlayerA) {
+    if(isleftPlayer) {
       return ((this.y + this.r) > player.y && (this.y - this.r) < player.y + player.height) && (this.x - this.r <= player.x + player.width);
     } else {
       return ((this.y + this.r) > player.y && (this.y - this.r) < player.y + player.height) && (this.x + this.r >= player.x);
     }
   }
 }
+
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const margin = 10;
+
+    let isRunning = false;
+    const KEY_W = 87;
+    const KEY_S = 83;
+    const SPACEBAR = 32;
+    const UP_ARROW = 38;
+    const DOWN_ARROW = 40;
+
+    let leftPlayer  = new Paddle(margin);
+    let rightPlayer = new Paddle(width - margin*2);
+    let ball = new Ball(leftPlayer.x + leftPlayer.width + 10, leftPlayer.y + leftPlayer.height / 2);
+    const AI = false;
+    let currentKey;
+  // TODO: should be an array
+    window.addEventListener("keydown", event => {
+      currentKey = event.keyCode
+    });
+
+    window.addEventListener("keyup", event => {
+      currentKey = event.keyCode
+    });
+
+    const keyIsDown = key => key === currentKey;
+
+    function draw() {
+      ctx.clearRect(0,0, width, height);
+      ctx.fillStyle = 'rgb(51, 51, 51)';
+      ctx.fillRect(0,0, width, height);
+
+      if (isRunning && AI) {
+        leftPlayer.follow(ball);
+      }
+
+      if (keyIsDown(UP_ARROW)) {
+        rightPlayer.goUp();
+      }
+
+      if (keyIsDown(DOWN_ARROW)) {
+        rightPlayer.goDown();
+      }
+
+      if (keyIsDown(KEY_W)) {
+        leftPlayer.goUp();
+      }
+
+      if (keyIsDown(KEY_S)) {
+        leftPlayer.goDown();
+      }
+
+      if (keyIsDown(SPACEBAR)) {
+        isRunning = !isRunning;
+      }
+
+      leftPlayer.draw();
+      rightPlayer.draw();
+
+      ball.draw();
+
+      if(isRunning) {
+        ball.update();
+      }
+      ctx.strokeStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(width / 2, 0);
+      ctx.lineTo(width / 2, height);
+      ctx.stroke();
+
+      requestAnimationFrame(draw);
+    }
+
+    requestAnimationFrame(draw);
+
+    return {
+      msg: "I protect this game from cheaters"
+    }
+  })()
+});
+
+class TestKlass {
+  width = 10;
+  height = 80;
+
+  constructor(x) {
+   
+  }
+}
+  
