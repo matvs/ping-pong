@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pong</title>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    .button {
+      position: absolute;
+      top: 416px;
+      width: 100px;
+      height: 40px;
+      outline: none;
+      background: #7bc043;
+      border: none;
+      border-radius: 20px;
+      color: #ffffff;
+      font-size: 23px;
+      margin-left: 10px;
+    }
+
+    .button:not([disabled]):hover {
+      background: #90df51;
+    }
+
+    .button:active {
+      transform: translate(2px, 2px);
+    }
+
+    .right {
+      left: 650px;
+    }
+
+    canvas {
+      margin-left: 10px;
+      margin-top: 10px;
+    }
+
+    .navigateButton {
+      position: absolute;
+      top: 475px;
+      outline: none;
+      width: 100px;
+      height: 100px;
+      left: 270px;
+      font-size: 60px;
+    }
+
+    .navigateButton.right {
+
+      left: 400px;
+    }
+
+    .noselect {
+      -webkit-touch-callout: none;
+      /* iOS Safari */
+      -webkit-user-select: none;
+      /* Safari */
+      -khtml-user-select: none;
+      /* Konqueror HTML */
+      -moz-user-select: none;
+      /* Old versions of Firefox */
+      -ms-user-select: none;
+      /* Internet Explorer/Edge */
+      user-select: none;
+      /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+    }
+  </style>
+  <script src="socket.io-client.min.js"></script>
+  <script src="p5.min.js"></script>
+  <script src="p5.sound.min.js"></script>
+  <script src="sketch.js"></script>
+</head>
+
+<body>
+  <button class="left button" id="leftPlayer" onclick="joinGame('left', this)">Join</button>
+  <button class="right button" id="rightPlayer" onclick="joinGame('right', this)">Join</button>
+  <button class="navigateButton noselect" onmousedown="movePaddle(true)" onmouseup="stopMovingPaddle(true)"
+    ontouchstart="movePaddle(true)" ontouchend="stopMovingPaddle(true)">&uarr;</button>
+  <button class="navigateButton right noselect" onmousedown="movePaddle(false)" onmouseup="stopMovingPaddle(false)"
+    ontouchstart="movePaddle(false)" ontouchend="stopMovingPaddle(false)">&darr;</button>
+</body>
+
+</html>
